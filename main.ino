@@ -5,6 +5,9 @@
 #include <NeoPixelBus.h>
 #include <NeoPixelAnimator.h>
 
+#include "genericStrip.h"
+#include "animations.h"
+
 #ifndef WIFI_SSID
 #error "WIFI_SSID is not set"
 #endif
@@ -14,9 +17,12 @@
 #endif
 
 // Strip object
-NeoPixelBus<NeoGrbFeature, NeoEsp8266Uart1800KbpsMethod> strip(PIXEL_COUNT);
+Strip<NeoGrbFeature, NeoEsp8266Uart1Sk6812Method> strip(PIXEL_COUNT);
 
-void setup() {
+GenericAnimation *anim;
+
+void setup()
+{
   Serial.begin(115200);
   Serial.println("Booting...");
 
@@ -28,13 +34,14 @@ void setup() {
   // Start WIFI
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PSK);
-  while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+  while (WiFi.waitForConnectResult() != WL_CONNECTED)
+  {
     Serial.println("Connection Failed! Rebooting...");
     delay(5000);
     ESP.restart();
   }
 
-  // OTA callbacks
+  // Setup OTA updates
   ArduinoOTA.onStart([]() {
     strip.ClearTo(RgbColor(0, 0, 0));
     strip.Show();
@@ -44,30 +51,42 @@ void setup() {
     strip.Show();
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    strip.ClearTo(RgbColor(128,0,0), 0, (progress * PIXEL_COUNT) / total);
+    strip.ClearTo(RgbColor(128, 0, 0), 0, (progress * PIXEL_COUNT) / total);
     strip.Show();
   });
   ArduinoOTA.onError([](ota_error_t error) {
     Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) {
+    if (error == OTA_AUTH_ERROR)
+    {
       Serial.println("Auth Failed");
-    } else if (error == OTA_BEGIN_ERROR) {
+    }
+    else if (error == OTA_BEGIN_ERROR)
+    {
       Serial.println("Begin Failed");
-    } else if (error == OTA_CONNECT_ERROR) {
+    }
+    else if (error == OTA_CONNECT_ERROR)
+    {
       Serial.println("Connect Failed");
-    } else if (error == OTA_RECEIVE_ERROR) {
+    }
+    else if (error == OTA_RECEIVE_ERROR)
+    {
       Serial.println("Receive Failed");
-    } else if (error == OTA_END_ERROR) {
+    }
+    else if (error == OTA_END_ERROR)
+    {
       Serial.println("End Failed");
     }
   });
   ArduinoOTA.begin();
 
   Serial.println("Started");
+  anim = new RandomSwitchColor(strip, RgbColor(31, 0, 0), RgbColor(0, 31, 0), 1);
 }
 
-void loop() {
+void loop()
+{
   ArduinoOTA.handle();
-  strip.ClearTo(RgbColor(128, 128, 0));
+
+  anim->Animate();
   strip.Show();
 }
