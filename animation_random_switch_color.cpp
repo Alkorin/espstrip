@@ -43,8 +43,8 @@ void RandomSwitchColor::UpdateLeds(const AnimationParam &param)
     float progress = NeoEase::Linear(param.progress);
 
     // Compute the new color
-    RgbColor updatedColorAToB = RgbColor::LinearBlend(ColorA, ColorB, param.progress);
-    RgbColor updatedColorBToA = RgbColor::LinearBlend(ColorB, ColorA, param.progress);
+    RgbColor updatedColorAToB = RgbColor::LinearBlend(ColorA, ColorB, progress);
+    RgbColor updatedColorBToA = RgbColor::LinearBlend(ColorB, ColorA, progress);
 
     // Update colors
     for (int i = 0; i < currentFlipIndexes.size(); i++)
