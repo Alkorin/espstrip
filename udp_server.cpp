@@ -17,6 +17,8 @@ bool UdpLedServer::handle()
             udpServer.read((unsigned char *)pBuffer, packetSize);
             // Write it to the strip
             memcpy(s.Pixels(), pBuffer, min(s.PixelsSize(), (size_t)packetSize));
+            free(pBuffer);
+
             s.Dirty();
             s.Show();
         }
