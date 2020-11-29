@@ -7,6 +7,7 @@
 
 #include "genericStrip.h"
 #include "animations.h"
+#include "udp_server.h"
 
 #ifndef WIFI_SSID
 #error "WIFI_SSID is not set"
@@ -18,6 +19,9 @@
 
 // Strip object
 Strip<NeoGrbFeature, NeoEsp8266Uart1Sk6812Method> strip(PIXEL_COUNT);
+
+// UDP server
+UdpLedServer server(strip);
 
 GenericAnimation *anim;
 
@@ -79,14 +83,21 @@ void setup()
   });
   ArduinoOTA.begin();
 
+  // Start UDP follower server
+  server.begin(8080);
+
   Serial.println("Started");
-  anim = new RandomSwitchColor(strip, RgbColor(31, 0, 0), RgbColor(0, 31, 0), 1);
+  //anim = new RandomSwitchColor(strip, RgbColor(255, 0, 255), RgbColor(0, 255, 0), RANDOM_LEDS);
+  anim = new Sparks(strip, RgbColor(255, 255, 255), RANDOM_LEDS);
 }
 
 void loop()
 {
   ArduinoOTA.handle();
 
-  anim->Animate();
-  strip.Show();
+  if (!server.handle())
+  {
+    anim->Animate();
+    strip.Show();
+  }
 }
