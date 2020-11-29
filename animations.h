@@ -25,3 +25,19 @@ private:
     std::vector<bool> stripState;
     std::vector<uint> currentFlipIndexes;
 };
+
+class Sparks : public GenericAnimation
+{
+public:
+    Sparks(GenericStrip &s, RgbColor a, uint concurrentLedsFlip);
+    void Animate() { animations.UpdateAnimations(); }
+
+private:
+    void UpdateLeds(const AnimationParam &param);
+
+    GenericStrip &s;
+    NeoPixelAnimator animations;
+    RgbColor Color;
+    std::vector<bool> stripState;
+    std::vector<uint> currentFlipIndexes;
+};
